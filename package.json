@@ -1,0 +1,19 @@
+{
+  "name": "playwright_repo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  
+  "scripts": {
+    "playwright:test": "playwright test",
+    "playwright:test:headed": "playwright test --headed",
+    "playwright:test:headed:chrome": "playwright test --headed --project='Google Chrome'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "@types/node": "^26.0.1"
+  }
+}

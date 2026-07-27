@@ -1,12 +1,7 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
-import {
-  openRegistrationForm,
-  registrationForm,
-  fillRegistrationForm,
-  triggerValidation,
-  generateAqaEmail,
-} from './helpers/registration.helper.js';
+import { LandingPage, RegistrationDialog, GaragePage } from './poms/index.js';
+import { generateAqaEmail } from './utils/user.util.js';
 
 const VALID_PASSWORD = 'Qwerty123';
 const RED_BORDER = 'rgb(220, 53, 69)';
@@ -28,18 +23,30 @@ const ERRORS = {
   passwordsDoNotMatch: 'Passwords do not match.',
 };
 
+/** @type {LandingPage} */
+let landingPage;
+/** @type {RegistrationDialog} */
+let registrationDialog;
+/** @type {GaragePage} */
+let garagePage;
+
 test.describe('Registration form', () => {
   test.beforeEach(async ({ page }) => {
-    await openRegistrationForm(page);
+    landingPage = new LandingPage(page);
+    registrationDialog = new RegistrationDialog(page);
+    garagePage = new GaragePage(page);
+
+    await landingPage.open();
+    await landingPage.clickSignUp();
+    await registrationDialog.waitForVisible();
   });
 
   test('Positive: successful registration with valid data creates user and opens Garage', async ({
     page,
   }) => {
-    const form = registrationForm(page);
     const email = generateAqaEmail();
 
-    await fillRegistrationForm(page, {
+    await registrationDialog.fill({
       name: 'John',
       lastName: 'Doe',
       email,
@@ -47,172 +54,162 @@ test.describe('Registration form', () => {
       repeatPassword: VALID_PASSWORD,
     });
 
-    await expect(form.registerButton).toBeEnabled();
-    await form.registerButton.click();
+    await expect(registrationDialog.registerButton).toBeEnabled();
+    await registrationDialog.register();
 
-    await expect(page).toHaveURL(/\/panel\/garage/);
-    await expect(page.getByRole('heading', { name: 'Garage' })).toBeVisible();
+    await expect(page).toHaveURL(garagePage.urlPattern());
+    await expect(garagePage.heading).toBeVisible();
   });
 
   test.describe('Negative scenarios', () => {
-    test('Name: empty field shows "Name is required", red border, Register disabled', async ({
-      page,
-    }) => {
-      const form = registrationForm(page);
+    test('Name: empty field shows "Name is required", red border, Register disabled', async () => {
+      await registrationDialog.triggerValidation(registrationDialog.nameInput);
 
-      await triggerValidation(form.name);
-
-      await expect(form.fieldError(form.name)).toHaveText(ERRORS.nameRequired);
-      await expect(form.name).toHaveCSS('border-color', RED_BORDER);
-      await expect(form.name).toHaveClass(/is-invalid/);
-      await expect(form.registerButton).toBeDisabled();
-    });
-
-    test('Name: length less than 2 characters shows length error', async ({ page }) => {
-      const form = registrationForm(page);
-
-      await form.name.fill('A');
-      await triggerValidation(form.name);
-
-      await expect(form.fieldError(form.name)).toHaveText(ERRORS.nameLength);
-      await expect(form.name).toHaveCSS('border-color', RED_BORDER);
-      await expect(form.registerButton).toBeDisabled();
-    });
-
-    test('Name: length more than 20 characters shows length error', async ({ page }) => {
-      const form = registrationForm(page);
-
-      await form.name.fill('A'.repeat(21));
-      await triggerValidation(form.name);
-
-      await expect(form.fieldError(form.name)).toHaveText(ERRORS.nameLength);
-      await expect(form.name).toHaveCSS('border-color', RED_BORDER);
-      await expect(form.registerButton).toBeDisabled();
-    });
-
-    test('Name: non-English symbols show "Name is invalid"', async ({ page }) => {
-      const form = registrationForm(page);
-
-      await form.name.fill('Іван');
-      await triggerValidation(form.name);
-
-      await expect(form.fieldError(form.name)).toHaveText(ERRORS.nameInvalid);
-      await expect(form.name).toHaveCSS('border-color', RED_BORDER);
-      await expect(form.registerButton).toBeDisabled();
-    });
-
-    test('Last name: empty field shows "Last name is required" and red border', async ({
-      page,
-    }) => {
-      const form = registrationForm(page);
-
-      await triggerValidation(form.lastName);
-
-      await expect(form.fieldError(form.lastName)).toHaveText(ERRORS.lastNameRequired);
-      await expect(form.lastName).toHaveCSS('border-color', RED_BORDER);
-      await expect(form.registerButton).toBeDisabled();
-    });
-
-    test('Last name: length less than 2 characters shows length error', async ({ page }) => {
-      const form = registrationForm(page);
-
-      await form.lastName.fill('B');
-      await triggerValidation(form.lastName);
-
-      await expect(form.fieldError(form.lastName)).toHaveText(ERRORS.lastNameLength);
-      await expect(form.lastName).toHaveCSS('border-color', RED_BORDER);
-      await expect(form.registerButton).toBeDisabled();
-    });
-
-    test('Last name: invalid data shows "Last name is invalid"', async ({ page }) => {
-      const form = registrationForm(page);
-
-      await form.lastName.fill('Doe123');
-      await triggerValidation(form.lastName);
-
-      await expect(form.fieldError(form.lastName)).toHaveText(ERRORS.lastNameInvalid);
-      await expect(form.lastName).toHaveCSS('border-color', RED_BORDER);
-      await expect(form.registerButton).toBeDisabled();
-    });
-
-    test('Email: empty field shows "Email required"', async ({ page }) => {
-      const form = registrationForm(page);
-
-      await triggerValidation(form.email);
-
-      await expect(form.fieldError(form.email)).toHaveText(ERRORS.emailRequired);
-      await expect(form.email).toHaveCSS('border-color', RED_BORDER);
-      await expect(form.registerButton).toBeDisabled();
-    });
-
-    test('Email: incorrect format shows "Email is incorrect"', async ({ page }) => {
-      const form = registrationForm(page);
-
-      await form.email.fill('not-an-email');
-      await triggerValidation(form.email);
-
-      await expect(form.fieldError(form.email)).toHaveText(ERRORS.emailIncorrect);
-      await expect(form.email).toHaveCSS('border-color', RED_BORDER);
-      await expect(form.registerButton).toBeDisabled();
-    });
-
-    test('Password: empty field shows "Password required"', async ({ page }) => {
-      const form = registrationForm(page);
-
-      await triggerValidation(form.password);
-
-      await expect(form.fieldError(form.password)).toHaveText(ERRORS.passwordRequired);
-      await expect(form.password).toHaveCSS('border-color', RED_BORDER);
-      await expect(form.registerButton).toBeDisabled();
-    });
-
-    test('Password: weak password shows complexity error from requirements', async ({
-      page,
-    }) => {
-      const form = registrationForm(page);
-
-      await form.password.fill('password');
-      await triggerValidation(form.password);
-
-      await expect(form.fieldError(form.password)).toHaveText(ERRORS.passwordInvalid);
-      await expect(form.password).toHaveCSS('border-color', RED_BORDER);
-      await expect(form.registerButton).toBeDisabled();
-    });
-
-    test('Re-enter password: empty field shows "Re-enter password required"', async ({
-      page,
-    }) => {
-      const form = registrationForm(page);
-
-      await triggerValidation(form.repeatPassword);
-
-      await expect(form.fieldError(form.repeatPassword)).toHaveText(
-        ERRORS.repeatPasswordRequired,
+      await expect(registrationDialog.fieldError(registrationDialog.nameInput)).toHaveText(
+        ERRORS.nameRequired,
       );
-      await expect(form.repeatPassword).toHaveCSS('border-color', RED_BORDER);
-      await expect(form.registerButton).toBeDisabled();
+      await expect(registrationDialog.nameInput).toHaveCSS('border-color', RED_BORDER);
+      await expect(registrationDialog.nameInput).toHaveClass(/is-invalid/);
+      await expect(registrationDialog.registerButton).toBeDisabled();
     });
 
-    test('Re-enter password: mismatch shows "Passwords do not match."', async ({
-      page,
-    }) => {
-      const form = registrationForm(page);
+    test('Name: length less than 2 characters shows length error', async () => {
+      await registrationDialog.nameInput.fill('A');
+      await registrationDialog.triggerValidation(registrationDialog.nameInput);
 
-      await form.password.fill(VALID_PASSWORD);
-      await form.repeatPassword.fill('OtherPass1');
-      await triggerValidation(form.repeatPassword);
-
-      await expect(form.fieldError(form.repeatPassword)).toHaveText(
-        ERRORS.passwordsDoNotMatch,
+      await expect(registrationDialog.fieldError(registrationDialog.nameInput)).toHaveText(
+        ERRORS.nameLength,
       );
-      await expect(form.repeatPassword).toHaveCSS('border-color', RED_BORDER);
-      await expect(form.registerButton).toBeDisabled();
+      await expect(registrationDialog.nameInput).toHaveCSS('border-color', RED_BORDER);
+      await expect(registrationDialog.registerButton).toBeDisabled();
     });
 
-    test('Register button is disabled when form data is incorrect', async ({ page }) => {
-      const form = registrationForm(page);
+    test('Name: length more than 20 characters shows length error', async () => {
+      await registrationDialog.nameInput.fill('A'.repeat(21));
+      await registrationDialog.triggerValidation(registrationDialog.nameInput);
 
-      await fillRegistrationForm(page, {
+      await expect(registrationDialog.fieldError(registrationDialog.nameInput)).toHaveText(
+        ERRORS.nameLength,
+      );
+      await expect(registrationDialog.nameInput).toHaveCSS('border-color', RED_BORDER);
+      await expect(registrationDialog.registerButton).toBeDisabled();
+    });
+
+    test('Name: non-English symbols show "Name is invalid"', async () => {
+      await registrationDialog.nameInput.fill('Іван');
+      await registrationDialog.triggerValidation(registrationDialog.nameInput);
+
+      await expect(registrationDialog.fieldError(registrationDialog.nameInput)).toHaveText(
+        ERRORS.nameInvalid,
+      );
+      await expect(registrationDialog.nameInput).toHaveCSS('border-color', RED_BORDER);
+      await expect(registrationDialog.registerButton).toBeDisabled();
+    });
+
+    test('Last name: empty field shows "Last name is required" and red border', async () => {
+      await registrationDialog.triggerValidation(registrationDialog.lastNameInput);
+
+      await expect(registrationDialog.fieldError(registrationDialog.lastNameInput)).toHaveText(
+        ERRORS.lastNameRequired,
+      );
+      await expect(registrationDialog.lastNameInput).toHaveCSS('border-color', RED_BORDER);
+      await expect(registrationDialog.registerButton).toBeDisabled();
+    });
+
+    test('Last name: length less than 2 characters shows length error', async () => {
+      await registrationDialog.lastNameInput.fill('B');
+      await registrationDialog.triggerValidation(registrationDialog.lastNameInput);
+
+      await expect(registrationDialog.fieldError(registrationDialog.lastNameInput)).toHaveText(
+        ERRORS.lastNameLength,
+      );
+      await expect(registrationDialog.lastNameInput).toHaveCSS('border-color', RED_BORDER);
+      await expect(registrationDialog.registerButton).toBeDisabled();
+    });
+
+    test('Last name: invalid data shows "Last name is invalid"', async () => {
+      await registrationDialog.lastNameInput.fill('Doe123');
+      await registrationDialog.triggerValidation(registrationDialog.lastNameInput);
+
+      await expect(registrationDialog.fieldError(registrationDialog.lastNameInput)).toHaveText(
+        ERRORS.lastNameInvalid,
+      );
+      await expect(registrationDialog.lastNameInput).toHaveCSS('border-color', RED_BORDER);
+      await expect(registrationDialog.registerButton).toBeDisabled();
+    });
+
+    test('Email: empty field shows "Email required"', async () => {
+      await registrationDialog.triggerValidation(registrationDialog.emailInput);
+
+      await expect(registrationDialog.fieldError(registrationDialog.emailInput)).toHaveText(
+        ERRORS.emailRequired,
+      );
+      await expect(registrationDialog.emailInput).toHaveCSS('border-color', RED_BORDER);
+      await expect(registrationDialog.registerButton).toBeDisabled();
+    });
+
+    test('Email: incorrect format shows "Email is incorrect"', async () => {
+      await registrationDialog.emailInput.fill('not-an-email');
+      await registrationDialog.triggerValidation(registrationDialog.emailInput);
+
+      await expect(registrationDialog.fieldError(registrationDialog.emailInput)).toHaveText(
+        ERRORS.emailIncorrect,
+      );
+      await expect(registrationDialog.emailInput).toHaveCSS('border-color', RED_BORDER);
+      await expect(registrationDialog.registerButton).toBeDisabled();
+    });
+
+    test('Password: empty field shows "Password required"', async () => {
+      await registrationDialog.triggerValidation(registrationDialog.passwordInput);
+
+      await expect(registrationDialog.fieldError(registrationDialog.passwordInput)).toHaveText(
+        ERRORS.passwordRequired,
+      );
+      await expect(registrationDialog.passwordInput).toHaveCSS('border-color', RED_BORDER);
+      await expect(registrationDialog.registerButton).toBeDisabled();
+    });
+
+    test('Password: weak password shows complexity error from requirements', async () => {
+      await registrationDialog.passwordInput.fill('password');
+      await registrationDialog.triggerValidation(registrationDialog.passwordInput);
+
+      await expect(registrationDialog.fieldError(registrationDialog.passwordInput)).toHaveText(
+        ERRORS.passwordInvalid,
+      );
+      await expect(registrationDialog.passwordInput).toHaveCSS('border-color', RED_BORDER);
+      await expect(registrationDialog.registerButton).toBeDisabled();
+    });
+
+    test('Re-enter password: empty field shows "Re-enter password required"', async () => {
+      await registrationDialog.triggerValidation(registrationDialog.repeatPasswordInput);
+
+      await expect(
+        registrationDialog.fieldError(registrationDialog.repeatPasswordInput),
+      ).toHaveText(ERRORS.repeatPasswordRequired);
+      await expect(registrationDialog.repeatPasswordInput).toHaveCSS(
+        'border-color',
+        RED_BORDER,
+      );
+      await expect(registrationDialog.registerButton).toBeDisabled();
+    });
+
+    test('Re-enter password: mismatch shows "Passwords do not match."', async () => {
+      await registrationDialog.passwordInput.fill(VALID_PASSWORD);
+      await registrationDialog.repeatPasswordInput.fill('OtherPass1');
+      await registrationDialog.triggerValidation(registrationDialog.repeatPasswordInput);
+
+      await expect(
+        registrationDialog.fieldError(registrationDialog.repeatPasswordInput),
+      ).toHaveText(ERRORS.passwordsDoNotMatch);
+      await expect(registrationDialog.repeatPasswordInput).toHaveCSS(
+        'border-color',
+        RED_BORDER,
+      );
+      await expect(registrationDialog.registerButton).toBeDisabled();
+    });
+
+    test('Register button is disabled when form data is incorrect', async () => {
+      await registrationDialog.fill({
         name: 'John',
         lastName: 'Doe',
         email: generateAqaEmail(),
@@ -220,7 +217,7 @@ test.describe('Registration form', () => {
         // repeatPassword intentionally missing — form is incorrect
       });
 
-      await expect(form.registerButton).toBeDisabled();
+      await expect(registrationDialog.registerButton).toBeDisabled();
     });
   });
 });

@@ -7,3 +7,6 @@ node_modules/
 /playwright/.cache/
 /playwright/.auth/
 hillel-js-for-qa-04.26/
+
+# Environment
+.env

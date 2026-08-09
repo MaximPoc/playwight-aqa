@@ -15,4 +15,8 @@ export class LandingPage {
   async clickSignUp() {
     await this.signUpButton.click();
   }
+
+  async clickSignIn() {
+    await this.signInButton.click();
+  }
 }

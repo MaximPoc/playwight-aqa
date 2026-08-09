@@ -6,13 +6,14 @@
   "scripts": {
     "playwright:test": "playwright test",
     "playwright:test:headed": "playwright test --headed",
-    "playwright:test:headed:chrome": "playwright test --headed --project='Google Chrome'"
+    "playwright:test:headed:chrome": "playwright test --headed --project='Google Chrome'",
+    "playwright:test:headless:firefox": "playwright test --project=firefox"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@playwright/test": "^1.61.1",
+    "@playwright/test": "1.49.1",
     "@types/node": "^26.0.1",
     "dotenv": "^17.4.2"
   }

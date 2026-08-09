@@ -1,0 +1,17 @@
+docker images
+docker ps -a
+
+# Збірка образу (старіша Playwright 1.49.1 + Firefox)
+docker build -t playwright-firefox:1.49.1 .
+
+# Запуск тестів у Docker з Firefox (CMD з Dockerfile)
+docker run --rm -it playwright-firefox:1.49.1
+
+# Запуск з явним скриптом (як на лекції: --entrypoint=npm ... run <script>)
+docker run --rm -it --entrypoint=npm playwright-firefox:1.49.1 run playwright:test:headless:firefox
+
+# Запуск з volume mount локальної папки (як на лекції з Cypress)
+docker run --rm -it -v "$PWD":/e2e -w /e2e --entrypoint=npm playwright-firefox:1.49.1 run playwright:test:headless:firefox
+
+# Інтерактивний bash у контейнері
+docker run --rm -it --entrypoint=bash playwright-firefox:1.49.1

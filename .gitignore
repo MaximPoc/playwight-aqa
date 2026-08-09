@@ -10,3 +10,8 @@ hillel-js-for-qa-04.26/
 
 # Environment
 .env
+
+# Docker local logs
+docker-build.log
+docker-firefox-run.log
+

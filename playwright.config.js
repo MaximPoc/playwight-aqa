@@ -16,7 +16,7 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  reporter: [['list'], ['html', { open: 'never' }]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL: envConfig.baseURL,
@@ -41,5 +41,12 @@ export default defineConfig({
       dependencies: ['setup'],
       testIgnore: /.*\.setup\.js/,
     },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+      dependencies: ['setup'],
+      testIgnore: /.*\.setup\.js/,
+    },
   ],
 });
+

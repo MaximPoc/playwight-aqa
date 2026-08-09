@@ -1,0 +1,33 @@
+=== Playwright version ===
+Version 1.49.1
+=== npm script ===
+
+> playwright_repo@1.0.0 playwright:test:headless:firefox
+> playwright test --project=firefox --list
+
+◇ injected env (5) from .env // tip: ⌘ enable debugging { debug: true }
+Listing tests:
+  [setup] › auth.setup.js:8:6 › authenticate as existing user and save storage state
+  [firefox] › cars.api.spec.js:34:7 › Cars API POST /api/cars › Positive: creates a car with valid brand, model and mileage
+  [firefox] › cars.api.spec.js:58:7 › Cars API POST /api/cars › Negative: returns 400 when required carModelId is missing
+  [firefox] › cars.api.spec.js:72:7 › Cars API POST /api/cars › Negative: returns 400 when mileage is out of allowed range
+  [firefox] › example.spec.js:4:5 › has title
+  [firefox] › example.spec.js:11:5 › get started link
+  [firefox] › garage.spec.js:5:7 › Garage page with authenticated user fixture › userGaragePage opens Garage as already logged-in user
+  [firefox] › profile.mock.spec.js:19:7 › Profile page response mocking › mocked GET /api/users/profile data is displayed on Profile page
+  [firefox] › registration.spec.js:44:7 › Registration form › Positive: successful registration with valid data creates user and opens Garage
+  [firefox] › registration.spec.js:65:9 › Registration form › Negative scenarios › Name: empty field shows "Name is required", red border, Register disabled
+  [firefox] › registration.spec.js:76:9 › Registration form › Negative scenarios › Name: length less than 2 characters shows length error
+  [firefox] › registration.spec.js:87:9 › Registration form › Negative scenarios › Name: length more than 20 characters shows length error
+  [firefox] › registration.spec.js:98:9 › Registration form › Negative scenarios › Name: non-English symbols show "Name is invalid"
+  [firefox] › registration.spec.js:109:9 › Registration form › Negative scenarios › Last name: empty field shows "Last name is required" and red border
+  [firefox] › registration.spec.js:119:9 › Registration form › Negative scenarios › Last name: length less than 2 characters shows length error
+  [firefox] › registration.spec.js:130:9 › Registration form › Negative scenarios › Last name: invalid data shows "Last name is invalid"
+  [firefox] › registration.spec.js:141:9 › Registration form › Negative scenarios › Email: empty field shows "Email required"
+  [firefox] › registration.spec.js:151:9 › Registration form › Negative scenarios › Email: incorrect format shows "Email is incorrect"
+  [firefox] › registration.spec.js:162:9 › Registration form › Negative scenarios › Password: empty field shows "Password required"
+  [firefox] › registration.spec.js:172:9 › Registration form › Negative scenarios › Password: weak password shows complexity error from requirements
+  [firefox] › registration.spec.js:183:9 › Registration form › Negative scenarios › Re-enter password: empty field shows "Re-enter password required"
+  [firefox] › registration.spec.js:196:9 › Registration form › Negative scenarios › Re-enter password: mismatch shows "Passwords do not match."
+  [firefox] › registration.spec.js:211:9 › Registration form › Negative scenarios › Register button is disabled when form data is incorrect
+Total: 23 tests in 6 files

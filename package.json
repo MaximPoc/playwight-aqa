@@ -6,14 +6,15 @@
   "scripts": {
     "playwright:test": "playwright test",
     "playwright:test:headed": "playwright test --headed",
-    "playwright:test:headed:chrome": "playwright test --headed --project='Google Chrome'"
+    "playwright:test:headed:chrome": "playwright test --headed --project='Google Chrome'",
+    "playwright:test:ci": "playwright test --project=chromium test/example.spec.js test/garage.spec.js test/cars.api.spec.js test/profile.mock.spec.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@playwright/test": "^1.61.1",
-    "@types/node": "^26.0.1",
-    "dotenv": "^17.4.2"
+    "@playwright/test": "1.39.0",
+    "@types/node": "^20.10.0",
+    "dotenv": "^16.3.1"
   }
 }

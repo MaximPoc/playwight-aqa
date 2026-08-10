@@ -1,0 +1,12 @@
+{
+  "name": "cypress-project",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "cypress:run": "cypress run --browser chrome",
+    "cypress:run:chrome": "cypress run --browser chrome"
+  },
+  "devDependencies": {
+    "cypress": "13.6.0"
+  }
+}
